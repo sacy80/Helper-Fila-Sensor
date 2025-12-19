@@ -1,0 +1,242 @@
+esphome:
+  name: helper-fila-sensor
+  friendly_name: Helper Fila Sensor
+  on_boot: 
+    then:
+      - light.turn_on: led_light      
+
+esp32:
+  board: seeed_xiao_esp32c6
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+  level: INFO
+
+# Enable Home Assistant API
+api:
+  reboot_timeout: 0s
+
+# Enable OTA
+ota:
+  - platform: esphome
+    password: "c8f7a5d4b6b0a8f7dbab2ad347264a92"
+
+# Enable Wifi
+wifi:
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Helper Fila Sensor"
+
+# Enable Wifi Captive Portal
+captive_portal:
+
+# Enable Local Web Serivces
+web_server:
+  port: 80
+  version: 3
+  local: True
+  include_internal: True
+#  auth: 
+#    password: 5tx4vkqq
+#    username: sacy
+
+# Enable Http request
+http_request:
+  id: Http_Call
+
+
+# Global Varaible 
+globals:
+    - id: printer_ip_addr
+      type: std::string
+      restore_value: yes
+      max_restore_data_length: 24
+      initial_value: '"printer ip address"'
+    - id: printer_pause
+      type: std::string
+      restore_value: yes
+      max_restore_data_length: 24
+
+# Sensor Pin1
+binary_sensor:
+  - platform: gpio
+    pin: GPIO0
+    name: Slot 1
+    id: Slot_1
+    interrupt_type: ANY
+    filters:
+      - delayed_on_off: 10ms
+    on_release:
+    - component.update: Display_Oled
+    - http_request.post:
+        url: !lambda |-
+          char buf[128];
+          sprintf(buf, "http://%s:7125/printer/gcode/script?script=%s", id(printer_ip_addr).c_str(), id(printer_pause).c_str());
+          return buf;
+        request_headers:
+          Content-Type: text/plain
+
+# Sensor Pin2
+  - platform: gpio
+    pin: GPIO1
+    name: Slot 2
+    id: Slot_2
+    interrupt_type: ANY
+    filters:
+      - delayed_on_off: 10ms
+    on_release:
+    - component.update: Display_Oled
+    - http_request.post:
+        url: !lambda |-
+          char buf[128];
+          sprintf(buf, "http://%s:7125/printer/gcode/script?script=%s", id(printer_ip_addr).c_str(), id(printer_pause).c_str());
+          return buf;
+        request_headers:
+          Content-Type: text/plain
+
+# Sensor Pin3
+  - platform: gpio
+    pin: GPIO2
+    name: Slot 3
+    id: Slot_3
+    interrupt_type: ANY
+    filters:
+      - delayed_on_off: 10ms
+    on_release:
+    - component.update: Display_Oled
+    - http_request.post:
+        url: !lambda |-
+          char buf[128];
+          sprintf(buf, "http://%s:7125/printer/gcode/script?script=%s", id(printer_ip_addr).c_str(), id(printer_pause).c_str());
+          return buf;
+        request_headers:
+          Content-Type: text/plain
+
+# Sensor Pin4
+  - platform: gpio
+    pin: GPIO3
+    name: Slot 4
+    id: Slot_4
+    interrupt_type: ANY
+    filters:
+      - delayed_on_off: 10ms
+    on_release:
+    - component.update: Display_Oled
+    - http_request.post:
+        url: !lambda |-
+          char buf[128];
+          sprintf(buf, "http://%s:7125/printer/gcode/script?script=%s", id(printer_ip_addr).c_str(), id(printer_pause).c_str());
+          return buf;
+        request_headers:
+          Content-Type: text/plain
+
+# Uncomment below for SPI Interfaces
+#
+#spi:
+#  clk_pin: GPIO7
+#  mosi_pin: GPIO6
+
+# i2c Interface
+i2c:
+  - id: bus_a
+    scan: False
+    frequency: 400kHz
+    scl: GPIO7
+    sda: GPIO6
+
+# Web front
+font:
+  - file: "gfonts://Roboto"
+    id: roboto_14
+    size: 14
+
+  - file: "gfonts://Poppins@700"
+    id: inter
+    size: 8
+
+display:
+# Uncomment below for ssd1306 SPI Display Interface
+#
+#  - platform: ssd1306_spi
+#    model: SH1106_128X64
+#    id: Display_Oled
+#    cs_pin: GPIO18
+#    dc_pin: GPIO19
+#    reset_pin: GPIO20
+#    lambda: |-
+#      it.printf(0, 0, id(roboto_15), "S1: %s", id(Slot_1).state ? "ON" : "OFF");
+#      it.printf(64, 0, id(roboto_15), "S2: %s", id(Slot_2).state ? "ON" : "OFF");
+#      it.printf(0, 25, id(roboto_15), "S3: %s", id(Slot_3).state ? "ON" : "OFF");
+#      it.printf(64, 25, id(roboto_15), "S4: %s", id(Slot_4).state ? "ON" : "OFF");
+#      it.printf(0, 45, id(inter), id(ip_addr).state.c_str());
+#      it.printf(64, 45, id(inter), "RSSI: %d", int(id(wlan_signal).state));
+#
+# ssd1306 i2c Display interface
+#
+  - platform: ssd1306_i2c
+    i2c_id: bus_a
+    model: "SH1106 128x32"
+    id: Display_Oled
+    lambda: |-
+      it.printf(0, 0, id(roboto_14), "S1: %s", id(Slot_1).state ? "ON" : "OFF");
+      it.printf(64, 0, id(roboto_14), "S2: %s", id(Slot_2).state ? "ON" : "OFF");
+      it.printf(0, 18, id(roboto_14), "S3: %s", id(Slot_3).state ? "ON" : "OFF");
+      it.printf(64, 18, id(roboto_14), "S4: %s", id(Slot_4).state ? "ON" : "OFF");
+#      it.printf(0, 45, id(inter), id(ip_addr).state.c_str());
+#      it.printf(64, 45, id(inter), "RSSI: %d", int(id(wlan_signal).state));
+
+# Blue Led indicator as controller power on
+output:
+  - platform: gpio
+    pin: GPIO15
+    id: status_led
+
+light:
+  - platform: binary
+    name: "status LED"
+    output: status_led
+    id: led_light
+
+# Wifi IP address Text info
+text_sensor:
+  - platform: wifi_info
+    ip_address: 
+      id: ip_addr
+
+# Wifi Signal Streng info
+sensor:
+  - platform: wifi_signal
+    id: wlan_signal
+    update_interval: 5s
+
+# Printer IP Address Text Input
+text:
+  - platform: template
+    name: "Pritner IP Address"
+    id: printer_ip_address
+    optimistic: True
+    max_length: 15
+    mode: TEXT
+    restore_value: True
+    set_action: 
+      then:
+        - lambda: 
+            id(printer_ip_addr) = x;
+
+# Type of Selectable PAUSE
+select:
+  - platform: template
+    name: "Pause Type"
+    id: pause_type
+    optimistic: True
+    options:
+      - PAUSE
+      - PAUSE_PRINTING
+      - PAUSEMA
+    initial_option: PAUSEMA
+    on_value: 
+      then:
+        - lambda: 
+            id(printer_pause) = x;
