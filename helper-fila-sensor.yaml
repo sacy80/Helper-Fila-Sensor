@@ -235,6 +235,8 @@ select:
       - PAUSE
       - PAUSE_PRINTING
       - PAUSEMA
+      - CUSTOM1
+      - CUSTOM2
     initial_option: PAUSEMA
     on_value: 
       then:
